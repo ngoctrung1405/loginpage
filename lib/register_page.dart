@@ -185,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     padding: EdgeInsets.symmetric(horizontal: 25),
                     child: TextFormField(
                       controller: confirmpasswordcontroller,
-                      enableSuggestions: false,
+                      //enableSuggestions: false,
                       autocorrect: false,
                       decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(

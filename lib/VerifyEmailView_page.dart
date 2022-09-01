@@ -76,7 +76,7 @@ class _VerifiEmailViewState extends State<VerifiEmailView> {
                 ),
                 ElevatedButton(
                     onPressed: () => FirebaseAuth.instance.signOut(),
-                    child: Text("CanCel")),
+                    child: Text("Cancel")),
               ],
             ),
           ),

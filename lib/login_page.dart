@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                     padding: EdgeInsets.symmetric(horizontal: 25),
                     child: TextFormField(
                       controller: passwordcontroller,
-                      enableSuggestions: false,
+                      //enableSuggestions: false,
                       autocorrect: false,
                       decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(

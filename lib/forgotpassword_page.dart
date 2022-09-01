@@ -64,7 +64,7 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(
-                  height: 15,
+                  height: 20,
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25),

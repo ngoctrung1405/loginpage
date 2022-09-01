@@ -4,6 +4,8 @@ import 'package:loginpage/VerifyEmailView_page.dart';
 import 'package:loginpage/auth.dart';
 
 class MainPage extends StatelessWidget {
+  const MainPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -65,7 +65,7 @@ Future<bool> showLogOutDiaLog(BuildContext context) {
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
-                child: Text("Sign Out")),
+                child: Text("Sign out")),
           ],
         );
       }).then((value) => value ?? false);
