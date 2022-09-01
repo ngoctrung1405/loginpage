@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1017634460842",
+    "project_id": "flutter-loginpage-d29fd",
+    "storage_bucket": "flutter-loginpage-d29fd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017634460842:android:1e60ea95c36efc2034ecd3",
+        "android_client_info": {
+          "package_name": "com.example.loginpage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1017634460842-6fp7chrio829ev5jona6jadl2m7v2imc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmxnH17kxwjq5lj8Af-5xLtVZTbjvnkR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017634460842-6fp7chrio829ev5jona6jadl2m7v2imc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
