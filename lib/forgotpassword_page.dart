@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 
 class ForgotPassWordPage extends StatefulWidget {
+  const ForgotPassWordPage({super.key});
+
   @override
   State<ForgotPassWordPage> createState() => _ForgotPassWordPageState();
 }
@@ -24,7 +26,7 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
       showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return const AlertDialog(
               content: Text("Password reset link sent! Check your email"),
             );
           });
@@ -45,7 +47,7 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple[200],
-        title: Text(
+        title: const Text(
           "Resset PassWord",
         ),
         elevation: 0,
@@ -58,16 +60,16 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   "Receive an email to\nreset your password",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
@@ -82,7 +84,7 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: " Your Email",
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.email,
                           color: Colors.deepPurple,
                         ),
@@ -96,13 +98,13 @@ class _ForgotPassWordPageState extends State<ForgotPassWordPage> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 MaterialButton(
                   onPressed: passwordReset,
-                  child: Text("Reset Password"),
                   color: Colors.deepPurple[200],
+                  child: const Text("Reset Password"),
                 ),
               ],
             ),

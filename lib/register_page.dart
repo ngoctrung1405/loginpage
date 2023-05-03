@@ -2,7 +2,12 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loginpage/main.dart';
+import 'package:loginpage/service/auth/auth_exception.dart';
+import 'package:loginpage/service/auth/bloc/auth_bloc.dart';
+import 'package:loginpage/service/auth/bloc/auth_event.dart';
+import 'package:loginpage/service/auth/bloc/auth_state.dart';
 import 'package:loginpage/utilities/show-error-dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show BlocListener, ReadContext;
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback showLoginPage;
@@ -26,37 +31,11 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future signUp() async {
-    try {
-      if (passwordconfirmed()) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailcontroller.text.trim(),
-          password: passwordcontroller.text.trim(),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "weak-password") {
-        await showErrorDialog(
-          context,
-          "Weak password",
-        );
-      } else if (e.code == "email-already-in-use") {
-        await showErrorDialog(
-          context,
-          "Email already in use",
-        );
-      } else {
-        await showErrorDialog(
-          context,
-          "Error ${e.code}",
-        );
-      }
-    } catch (e) {
-      await showErrorDialog(
-        context,
-        e.toString(),
-      );
+    if (passwordconfirmed()) {
+      final email = emailcontroller.text.trim();
+      final password = passwordcontroller.text.trim();
+      context.read<AuthBloc>().add(AuthEventRegister(email, password));
     }
-    navigatorkey.currentState!.popUntil((route) => route.isFirst);
   }
 
   bool passwordconfirmed() {
@@ -76,180 +55,202 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple),
         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
         padding: MaterialStateProperty.all<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 155)),
+            const EdgeInsets.symmetric(horizontal: 155)),
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
-                side: BorderSide(color: Colors.deepPurple))));
-    return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Form(
-              key: globalFormKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.android,
-                    size: 100,
-                  ),
-                  SizedBox(
-                    height: 75,
-                  ),
-                  Text("Hello There",
-                      style:
-                          TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Register below with your details!",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  SizedBox(
-                    height: 50,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25),
-                    child: TextFormField(
-                      controller: emailcontroller,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.deepPurple),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        hintText: "Email",
-                        fillColor: Colors.grey[200],
-                        filled: true,
-                        prefixIcon: Icon(
-                          Icons.email,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (email) =>
-                          email != null && !EmailValidator.validate(email)
-                              ? "Enter a valid email"
-                              : null,
+                side: const BorderSide(color: Colors.deepPurple))));
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateRegistering) {
+          if (state.exception is WeakPasswordAuthException) {
+            await showErrorDialog(context, "Weak password");
+          } else if (state.exception is EmailAlreadyInUseAuthException) {
+            await showErrorDialog(context, "Email is already in use");
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(context, "Failed to register");
+          } else if (state.exception is InvalidEmailAuthException) {
+            await showErrorDialog(context, "Invalid email");
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[300],
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Form(
+                key: globalFormKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.android,
+                      size: 100,
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25),
-                    child: TextFormField(
-                      controller: passwordcontroller,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: InputDecoration(
+                    const SizedBox(
+                      height: 75,
+                    ),
+                    const Text("Hello There",
+                        style: TextStyle(
+                            fontSize: 50, fontWeight: FontWeight.bold)),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                      "Register below with your details!",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: TextFormField(
+                        controller: emailcontroller,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.deepPurple),
+                            borderSide:
+                                const BorderSide(color: Colors.deepPurple),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          hintText: "PassWord",
+                          hintText: "Email",
                           fillColor: Colors.grey[200],
                           filled: true,
-                          prefixIcon: Icon(
-                            Icons.lock,
+                          prefixIcon: const Icon(
+                            Icons.email,
                             color: Colors.deepPurple,
                           ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                hidepassword = !hidepassword;
-                              });
-                            },
-                            color:
-                                Theme.of(context).accentColor.withOpacity(0.4),
-                            icon: Icon(hidepassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
-                          )),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) => value != null && value.length < 6
-                          ? 'Enter min.6 characters'
-                          : null,
-                      obscureText: hidepassword,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25),
-                    child: TextFormField(
-                      controller: confirmpasswordcontroller,
-                      //enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.deepPurple),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          hintText: "ConfirmPassWord",
-                          fillColor: Colors.grey[200],
-                          filled: true,
-                          prefixIcon: Icon(
-                            Icons.lock,
-                            color: Colors.deepPurple,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                hidepassword = !hidepassword;
-                              });
-                            },
-                            color:
-                                Theme.of(context).accentColor.withOpacity(0.4),
-                            icon: Icon(hidepassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
-                          )),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) => value != null && value.length < 6
-                          ? 'Enter min.6 characters'
-                          : null,
-                      obscureText: hidepassword,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: signUp,
-                    icon: Icon(Icons.lock_open),
-                    label: Text("Sign up"),
-                    style: mybutton,
-                  ),
-                  SizedBox(
-                    height: 25,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "I am a remember!",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      GestureDetector(
-                        onTap: widget.showLoginPage,
-                        child: Text(
-                          "Login now",
-                          style: TextStyle(color: Colors.blue),
                         ),
-                      )
-                    ],
-                  ),
-                ],
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (email) =>
+                            email != null && !EmailValidator.validate(email)
+                                ? "Enter a valid email"
+                                : null,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: TextFormField(
+                        controller: passwordcontroller,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.deepPurple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            hintText: "PassWord",
+                            fillColor: Colors.grey[200],
+                            filled: true,
+                            prefixIcon: const Icon(
+                              Icons.lock,
+                              color: Colors.deepPurple,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  hidepassword = !hidepassword;
+                                });
+                              },
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withOpacity(0.4),
+                              icon: Icon(hidepassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                            )),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) => value != null && value.length < 6
+                            ? 'Enter min.6 characters'
+                            : null,
+                        obscureText: hidepassword,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: TextFormField(
+                        controller: confirmpasswordcontroller,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.deepPurple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            hintText: "ConfirmPassWord",
+                            fillColor: Colors.grey[200],
+                            filled: true,
+                            prefixIcon: const Icon(
+                              Icons.lock,
+                              color: Colors.deepPurple,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  hidepassword = !hidepassword;
+                                });
+                              },
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withOpacity(0.4),
+                              icon: Icon(hidepassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                            )),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) => value != null && value.length < 6
+                            ? 'Enter min.6 characters'
+                            : null,
+                        obscureText: hidepassword,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: signUp,
+                      icon: const Icon(Icons.lock_open),
+                      label: const Text("Sign up"),
+                      style: mybutton,
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "I am a remember!",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        GestureDetector(
+                          onTap: widget.showLoginPage,
+                          child: const Text(
+                            "Login now",
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
